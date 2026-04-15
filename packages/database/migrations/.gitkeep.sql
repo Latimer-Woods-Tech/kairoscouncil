@@ -1,0 +1,2 @@
+-- Placeholder for tracked migrations
+-- Use: pnpm --filter @kairos/database migrate

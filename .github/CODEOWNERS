@@ -1,0 +1,12 @@
+# Code owners for Kairos' Council
+# Require review on all changes to main
+
+* @adrper79-dot
+
+# Architectural constants — require explicit review
+docs/ARCHITECTURE.md @adrper79-dot
+docs/adr/ @adrper79-dot
+
+# Security-sensitive paths
+apps/api/src/middleware/ @adrper79-dot
+packages/game-engine/src/seed/ @adrper79-dot

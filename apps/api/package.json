@@ -1,0 +1,23 @@
+{
+  "name": "@kairos/api",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src/",
+    "test": "vitest run",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
+    "deploy:staging": "wrangler deploy --env staging",
+    "deploy:prod": "wrangler deploy --env production",
+    "clean": "rm -rf dist *.tsbuildinfo"
+  },
+  "dependencies": {
+    "@kairos/shared": "workspace:*",
+    "@kairos/astronomical-engine": "workspace:*",
+    "@kairos/game-engine": "workspace:*",
+    "@kairos/database": "workspace:*"
+  }
+}
