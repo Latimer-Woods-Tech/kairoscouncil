@@ -1,5 +1,5 @@
 # Kairos' Council — Lessons Learned
-*Owned by: 🔁 LOOP GUARDIAN · Read before every session · Last updated: 2026-04-15*
+*Owned by: 🔁 LOOP GUARDIAN · Read before every session · Last updated: 2026-04-16*
 
 ## LL-001: Astronomical Engine Isolation
 **Lesson:** Never import game-engine types into astronomical-engine.
@@ -36,3 +36,16 @@
 **Context:** First session of Kairos' Council build.
 **Rule:** Define interfaces and contracts before implementation. Types are the API.
 **Validation:** TypeScript strict mode catches contract violations at compile time.
+
+## LL-007: Test Fixtures Must Be Computed, Not Hardcoded
+**Lesson:** Hardcoded JDE values in tests were wrong by 375 days (Napoleon's birth). Expected planet positions were mean heliocentric L₀ values, not geocentric.
+**Context:** Task 2 — Meeus engine QA spec was written before implementation, so expected values were estimated rather than verified.
+**Rule:** Any expected JDE, longitude, or position value in a test must be computed via the same formula the implementation uses, or verified against a trusted source (JPL Horizons, astro.com). Never estimate from memory.
+**Rule:** Geocentric ≠ Heliocentric. Planet positions computed via Keplerian elements are heliocentric; subtracting Earth's position yields geocentric. Tests must use geocentric ranges.
+**Validation:** If tests fail with large constant offsets (not rounding errors), suspect the expected value, not the implementation.
+
+## LL-008: tsconfig noEmit Conflicts with Project References
+**Lesson:** Setting `noEmit: true` in the root tsconfig.json conflicts with TypeScript project references — referenced projects MUST emit declarations.
+**Context:** Task 2 — `tsc --noEmit` in the astronomical-engine package failed with TS6310 because the shared package inherited `noEmit: true`.
+**Rule:** Packages that are referenced by other packages via `tsconfig.json references[]` must override `noEmit: false` in their own tsconfig. The root `noEmit: true` only applies to packages that don't need to emit.
+**Validation:** `pnpm --filter @kairos/astronomical-engine typecheck` passes without TS6310.

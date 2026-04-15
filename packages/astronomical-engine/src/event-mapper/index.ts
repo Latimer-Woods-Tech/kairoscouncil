@@ -5,6 +5,5 @@
  * Assigns Forge Intensity (1/2/3) based on orb thresholds.
  */
 
-// Event mapping — to be implemented in Task 3
-// Forge Intensity assignment — to be implemented in Task 3
-// Named event detection — to be implemented in Task 3
+export { getForgeIntensity, filterRulingPlanetTransits } from './forge-intensity.js';
+export { getNamedEvent, detectNamedEvents } from './named-events.js';

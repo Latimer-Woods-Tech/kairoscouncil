@@ -9,11 +9,11 @@
  * Exports: CosmosState, TransitData, AspectData via @kairos/shared types.
  */
 
-// Core Layer — Meeus calculations (Task 2)
-// export * from './core/index.js';
+// Core Layer — Meeus calculations
+export * from './core/index.js';
 
-// Event Mapper — raw calculations → named game states (Task 3)
-// export * from './event-mapper/index.js';
+// Event Mapper — raw calculations → named game states
+export * from './event-mapper/index.js';
 
 // Transit Cache management (Task 4)
 // export * from './cache/index.js';

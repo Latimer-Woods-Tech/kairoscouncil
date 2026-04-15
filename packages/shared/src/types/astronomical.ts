@@ -49,13 +49,13 @@ export interface PlanetaryPosition {
   dignity: DignityState;
 }
 
-/** A detected aspect between two planetary positions. */
+/** A detected aspect between two planetary positions (sky-to-sky). */
 export interface AspectData {
   planet1: Planet;
   planet2: Planet;
   type: AspectType;
-  exactAngle: number;
   currentOrb: number;
+  exactnessScore: number;
   isApplying: boolean;
 }
 
@@ -95,6 +95,7 @@ export interface BirthData {
 /** Natal chart calculated from birth data. */
 export interface NatalChart {
   birthData: BirthData;
+  julianDate: number;
   planetaryPositions: PlanetaryPosition[];
   natalAspects: AspectData[];
 }
