@@ -7,20 +7,20 @@
  * This package consumes astronomical output but NEVER imports engine internals (AC-001).
  */
 
-// Match state management (Task 6)
-// export * from './match/index.js';
+// Deterministic seed system — AC-003
+export * from './seed/index.js';
 
-// Combat damage calculation (Task 8)
-// export * from './combat/index.js';
+// Match state management — AC-002, AC-003
+export * from './match/index.js';
 
-// Aspect bond logic (Task 9)
-// export * from './bonds/index.js';
+// Combat damage calculation — AC-005, AC-006
+export * from './combat/index.js';
 
-// Burst trigger evaluation (Task 10)
-// export * from './bursts/index.js';
+// Aspect bond logic — GAME_DESIGN §7.6
+export * from './bonds/index.js';
 
-// Transit Clock management (Task 11)
-// export * from './clock/index.js';
+// Burst trigger evaluation — GAME_DESIGN §8.3
+export * from './bursts/index.js';
 
-// Deterministic seed system (Task 6)
-// export * from './seed/index.js';
+// Transit Clock management — GAME_DESIGN §7.9
+export * from './clock/index.js';

@@ -44,6 +44,18 @@
 **Rule:** Geocentric ≠ Heliocentric. Planet positions computed via Keplerian elements are heliocentric; subtracting Earth's position yields geocentric. Tests must use geocentric ranges.
 **Validation:** If tests fail with large constant offsets (not rounding errors), suspect the expected value, not the implementation.
 
+## LL-009: Database Seed Scripts Need Built Packages
+**Lesson:** The database seed script imports `@kairos/astronomical-engine` to compute natal charts. This requires the astronomical-engine to be built before running the seed.
+**Context:** Task 5 — `pnpm --filter @kairos/database seed` failed with module resolution errors until `pnpm --filter @kairos/astronomical-engine build` was run first.
+**Rule:** When the database package references the astronomical-engine (e.g., in seed scripts), always build the astronomical-engine first. Do NOT add it as a TypeScript project reference in the database `tsconfig.json` (it would conflict with `noEmit: true` — see LL-008).
+**Validation:** `pnpm --filter @kairos/astronomical-engine build && pnpm --filter @kairos/database seed:sql` runs without errors.
+
+## LL-010: Phase 0 Roster Is Fixed
+**Lesson:** The Phase 0 roster is defined in GAME_DESIGN.md and is non-negotiable until Phase 1.
+**Context:** Task 5 — Initial figure selection diverged from GAME_DESIGN.md. The correct roster is: Julius Caesar, Napoleon Bonaparte, Cleopatra VII, Pythagoras, Sappho, Hannibal Barca, Hypatia, Rumi, Sun Tzu, Hildegard von Bingen.
+**Rule:** Always check GAME_DESIGN.md for the canonical Phase 0 roster. Do not substitute figures without updating GAME_DESIGN.md first.
+**Validation:** `PHASE_0_FIGURES` in packages/database/src/figures.ts must have exactly 10 entries matching GAME_DESIGN.md.
+
 ## LL-008: tsconfig noEmit Conflicts with Project References
 **Lesson:** Setting `noEmit: true` in the root tsconfig.json conflicts with TypeScript project references — referenced projects MUST emit declarations.
 **Context:** Task 2 — `tsc --noEmit` in the astronomical-engine package failed with TS6310 because the shared package inherited `noEmit: true`.

@@ -15,5 +15,5 @@ export * from './core/index.js';
 // Event Mapper — raw calculations → named game states
 export * from './event-mapper/index.js';
 
-// Transit Cache management (Task 4)
-// export * from './cache/index.js';
+// Transit Cache management
+export * from './cache/index.js';
