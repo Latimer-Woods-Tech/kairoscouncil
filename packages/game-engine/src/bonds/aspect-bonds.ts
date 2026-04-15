@@ -33,6 +33,7 @@ import {
   CHRONOS_DELAY_COST,
   MAX_CHRONOS_DELAYS,
   CHRONOS_OVERDELAY_PENALTY,
+  TRANSIT_POWER_FLOOR,
 } from '@kairos/shared';
 import type { SeededRandom } from '../seed/seed.js';
 
@@ -264,8 +265,8 @@ export function expireStaleBonds(
  * and the Chronos figure loses 10 Transit Power.
  *
  * @param match - Current match state
- * @param playerId - Player performing the delay
- * @param targetBondFigureId - Figure whose bond is being delayed
+ * @param playerId - Player performing the delay (must have a Chronos Ascendant figure)
+ * @param targetBondFigureId - Figure on opponent's battlefield whose bond is being delayed
  * @param bondAspectType - The aspect type of the bond being targeted
  * @returns Updated MatchState
  * @throws KairosError KC-2005 if insufficient CE
@@ -279,87 +280,79 @@ export function processChronosDelay(
   targetBondFigureId: string,
   bondAspectType: AspectType,
 ): MatchState {
-  const player = match.players.find((p) => p.playerId === playerId);
-  if (!player) {
+  const activePlayer = match.players.find((p) => p.playerId === playerId);
+  if (!activePlayer) {
     throw new KairosError(ErrorCode.INVALID_MATCH_STATE, `Player ${playerId} not found`);
   }
 
-  if (player.celestialEnergy < CHRONOS_DELAY_COST) {
+  if (activePlayer.celestialEnergy < CHRONOS_DELAY_COST) {
     throw new KairosError(
       ErrorCode.CE_INSUFFICIENT,
-      `Chronos delay costs ${CHRONOS_DELAY_COST} CE; have ${player.celestialEnergy}`,
-      { required: CHRONOS_DELAY_COST, available: player.celestialEnergy },
+      `Chronos delay costs ${CHRONOS_DELAY_COST} CE; have ${activePlayer.celestialEnergy}`,
+      { required: CHRONOS_DELAY_COST, available: activePlayer.celestialEnergy },
     );
   }
 
-  // Find the Chronos figure on the active player's battlefield
-  const chronosFigure = player.battlefield.find(
+  // Find the Chronos figure on the active player's battlefield (for penalty)
+  const chronosFigure = activePlayer.battlefield.find(
     (c) => c.figure.primaryForge === 'Chronos' && c.state === 'Ascendant',
   );
 
-  // Find the target bond (on opponent's battlefield)
+  // Check whether the targeted bond will exceed max delays after this action
   const opponent = match.players.find((p) => p.playerId !== playerId);
   if (!opponent) {
     throw new KairosError(ErrorCode.INVALID_MATCH_STATE, 'No opponent found');
   }
 
+  const targetFigure = opponent.battlefield.find((c) => c.figureId === targetBondFigureId);
+  const targetBond = targetFigure?.activeAspectBonds.find(
+    (b) => b.aspectType === bondAspectType,
+  );
+  const newDelayCount = (targetBond?.chronosDelayCount ?? 0) + 1;
+  const fateAsserts = newDelayCount >= MAX_CHRONOS_DELAYS;
+
   return {
     ...match,
     players: match.players.map((p) => {
       if (p.playerId === playerId) {
+        // Deduct CE and apply penalty to Chronos figure if fate asserts
         return {
           ...p,
           celestialEnergy: p.celestialEnergy - CHRONOS_DELAY_COST,
+          battlefield: p.battlefield.map((c) => {
+            if (!fateAsserts || !chronosFigure || c.figureId !== chronosFigure.figureId) {
+              return c;
+            }
+            // Fate asserts — Chronos figure loses 10 Transit Power (AC-007)
+            return {
+              ...c,
+              transitPower: Math.max(TRANSIT_POWER_FLOOR, c.transitPower - CHRONOS_OVERDELAY_PENALTY),
+            };
+          }),
         };
       }
 
-      // Update the target bond on opponent's battlefield
+      if (p.playerId !== opponent.playerId) return p;
+
+      // Update the targeted bond on opponent's battlefield
       return {
         ...p,
         battlefield: p.battlefield.map((card) => {
           if (card.figureId !== targetBondFigureId) return card;
-
-          const updatedBonds = card.activeAspectBonds.map((bond) => {
-            if (bond.aspectType !== bondAspectType) return bond;
-
-            const newDelayCount = bond.chronosDelayCount + 1;
-            if (newDelayCount >= MAX_CHRONOS_DELAYS) {
-              // Fate asserts — bond activates, Chronos figure penalized
-              return { ...bond, isActive: true, chronosDelayCount: newDelayCount };
-            }
-            return { ...bond, isActive: false, chronosDelayCount: newDelayCount };
-          });
-
-          return { ...card, activeAspectBonds: updatedBonds };
+          return {
+            ...card,
+            activeAspectBonds: card.activeAspectBonds.map((bond) => {
+              if (bond.aspectType !== bondAspectType) return bond;
+              // Fate asserts: bond activates regardless; otherwise deactivated for 1 turn
+              return {
+                ...bond,
+                isActive: fateAsserts,
+                chronosDelayCount: newDelayCount,
+              };
+            }),
+          };
         }),
       };
     }),
-    // Apply Chronos overdelay penalty to the Chronos figure if delay limit exceeded
-    ...(chronosFigure && match.players.some((p) =>
-      p.playerId === playerId &&
-      p.battlefield.some((c) =>
-        c.figureId === targetBondFigureId &&
-        c.activeAspectBonds.some(
-          (b) => b.aspectType === bondAspectType && b.chronosDelayCount >= MAX_CHRONOS_DELAYS,
-        ),
-      ),
-    )
-      ? {
-          players: match.players.map((p) => {
-            if (p.playerId !== playerId) return p;
-            return {
-              ...p,
-              celestialEnergy: p.celestialEnergy - CHRONOS_DELAY_COST,
-              battlefield: p.battlefield.map((c) => {
-                if (c.figureId !== chronosFigure.figureId) return c;
-                return {
-                  ...c,
-                  transitPower: Math.max(40, c.transitPower - CHRONOS_OVERDELAY_PENALTY),
-                };
-              }),
-            };
-          }),
-        }
-      : {}),
   };
 }

@@ -261,8 +261,12 @@ export function initializeMatch(input: InitMatchInput): MatchState {
 
   // ── Match ID ─────────────────────────────────────────────────────────────
   // Phase 0: generate a deterministic ID from seed; Phase 1+: DB-assigned UUID
-  const matchIdNum = BigInt(seed) ^ BigInt(seedTimestamp.getTime());
-  const matchId = matchIdNum.toString(16).padStart(32, '0').replace(
+  // Ensure hex string is exactly 32 chars before formatting as UUID-style
+  const matchIdHex = (BigInt(seed) ^ BigInt(seedTimestamp.getTime()))
+    .toString(16)
+    .padStart(32, '0')
+    .slice(0, 32);
+  const matchId = matchIdHex.replace(
     /^(.{8})(.{4})(.{4})(.{4})(.{12})$/,
     '$1-$2-$3-$4-$5',
   );

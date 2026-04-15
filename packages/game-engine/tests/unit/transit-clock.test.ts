@@ -149,6 +149,8 @@ describe('computeClockEvents', () => {
 
     const result = computeClockEvents(match, 'player1', 0, 0);
     expect(result.events).toContain('all_dormant');
-    // +1 turn_end, -1 all_dormant = net 0, but minimum 0
+    // +1 turn_end, -1 all_dormant = net 0; clock stays at 5 (minimum 0 enforced)
+    expect(result.netChange).toBe(0);
+    expect(result.newClock).toBe(5); // 5 + 0 = 5
   });
 });

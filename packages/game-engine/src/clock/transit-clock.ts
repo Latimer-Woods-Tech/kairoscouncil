@@ -281,11 +281,11 @@ export function applyCelestialInversion(match: MatchState, playerId: string): Ma
   return {
     ...match,
     players: match.players.map((p) => {
-      // Deduct all CE from invoking player
-      const ceDeducted = p.playerId === playerId ? 0 : p.celestialEnergy;
+      // Deduct all CE from invoking player only; opponents' CE is unchanged
+      if (p.playerId !== playerId) return p;
       return {
         ...p,
-        celestialEnergy: p.playerId === playerId ? 0 : ceDeducted,
+        celestialEnergy: 0,
         battlefield: p.battlefield.map((card) => ({
           ...card,
           transitPower: midpoint,

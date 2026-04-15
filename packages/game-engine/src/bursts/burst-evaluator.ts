@@ -137,12 +137,9 @@ export function applyBurstEffect(
       break;
 
     case 'The Burning Word': {
-      // All bonds generate 5 CE total
-      const bondCount = activePlayer.battlefield.reduce(
-        (sum, c) => sum + c.activeAspectBonds.filter((b) => b.isActive).length,
-        0,
-      );
-      const burstCE = bondCount > 0 ? 5 : 0; // 5 CE regardless of bond count (GDD)
+      // All bonds generate 5 CE total (GDD §8.3: "5 total" regardless of individual bond counts)
+      // requiredActiveBonds: 2 ensures bonds exist before this triggers
+      const burstCE = 5;
       updatedMatch = {
         ...updatedMatch,
         players: updatedMatch.players.map((p) => {

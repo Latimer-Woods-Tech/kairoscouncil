@@ -47,8 +47,9 @@ function formatBirthDate(year: number, month: number, day: number): string {
   const mm = String(month).padStart(2, '0');
   const dd = String(d).padStart(2, '0');
   if (year <= 0) {
-    // Astronomical year 0 = 1 BC, -68 = 69 BC, etc.
-    const bcYear = Math.abs(year) + 1;
+    // Astronomical year 0 = 1 BC, year -1 = 2 BC, year -n = (n+1) BC
+    // Formula: BC year = 1 - astronomical year (e.g., year -99 = 100 BC)
+    const bcYear = 1 - year;
     return `${String(bcYear).padStart(4, '0')}-${mm}-${dd} BC`;
   }
   return `${String(year).padStart(4, '0')}-${mm}-${dd}`;
