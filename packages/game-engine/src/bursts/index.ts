@@ -57,6 +57,8 @@ export const BURST_DEFINITIONS: BurstDefinition[] = [
     effect:
       'Reveal all forecast entries for the next 3 turns. All friendly Aether figures gain +10 TP until end of next turn.',
   },
+  // NOTE: Sappho and Rumi intentionally share the burst name "The Burning Word" per the
+  // Phase 0 Roster spec — they are distinct figures with the same legendary burst ability.
   {
     name: 'The Burning Word',
     requiredFigureId: 'sappho',
